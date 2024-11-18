@@ -73,8 +73,15 @@ document.addEventListener('DOMContentLoaded', function () {
             })
                 .then(response => {
                     if (response.status === 201) {
-                        // Если регистрация успешна, перенаправляем на страницу логина
-                        window.location.href = "/login";
+                        // Если регистрация прошла успешно, отображаем сообщение об успехе
+                        const successMessage = document.getElementById('successMessage');
+                        successMessage.style.display = 'block';
+
+                        // Ждем 3 секунды перед перенаправлением
+                        setTimeout(() => {
+                            window.location.href = "/login";
+                        }, 3000);
+
                     } else {
                         return response.json().then(data => {
                             // Если возникла ошибка, отображаем сообщение об ошибке
