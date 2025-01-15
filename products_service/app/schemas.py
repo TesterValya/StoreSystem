@@ -178,7 +178,7 @@ class ProductPatchResponse(BaseModel):
 
 class SupplierBase(BaseModel):
     # Название: обязательное, от 3 до 100 символов
-    name: constr(min_length=1, max_length=100)
+    name: constr(min_length=3, max_length=100)
     # Контактное лицо: обязательное, максимум 100 символов
     contact_name: constr(max_length=100)
     # Email контактного лица: обязательное, максимум 100 символов, валидный формат email
@@ -197,7 +197,7 @@ class SupplierBase(BaseModel):
     @validator("name")
     def validate_name(cls, value):
         # Проверка длины и содержимого: только буквы и цифры
-        pattern = r"^[A-Za-zА-Яа-я0-9\s]+$"
+        pattern = r"^[A-Za-zА-Яа-я0-9\s]{3,100}$"
         if not re.match(pattern, value):
             raise ValueError(
                 "Name must contain only letters, digits, and spaces, and be 3-100 characters long.")
@@ -206,15 +206,17 @@ class SupplierBase(BaseModel):
     @validator("contact_name")
     def validate_contact_name(cls, value):
         # Проверка на наличие букв и цифр
-        pattern = r"^[A-Za-zА-Яа-я0-9\s]+$"
+        pattern = r"^[A-Za-zА-Яа-я0-9\s]{1,100}$"
         if not re.match(pattern, value):
             raise ValueError(
-                "Contact name must contain only letters, digits, and spaces.")
+                "Contact name must contain only letters, digits, and spaces, and be up to 100 characters long.")
         return value
 
     @validator("contact_email")
     def validate_contact_email(cls, value):
         # Pydantic уже проверяет формат email через EmailStr, так что дополнительная валидация не требуется.
+        if len(value) > 100:
+            raise ValueError("Email must be up to 100 characters long.")
         return value
 
     @validator("phone_number")
@@ -233,10 +235,10 @@ class SupplierBase(BaseModel):
             if value.strip() == "":
                 raise ValueError("Address cannot contain only spaces.")
             # Проверка адреса: только буквы, цифры и пробелы
-            pattern = r"^[A-Za-zА-Яа-я0-9\s]+$"
+            pattern = r"^[A-Za-zА-Яа-я0-9\s]{0,200}$"
             if not re.match(pattern, value):
                 raise ValueError(
-                    "Address must contain only letters, digits, and spaces.")
+                    "Address must contain only letters, digits, and spaces, and be up to 200 characters long.")
         return value
 
     @validator("country")
@@ -245,9 +247,10 @@ class SupplierBase(BaseModel):
             if value.strip() == "":
                 raise ValueError("Country cannot contain only spaces.")
             # Проверка страны: только буквы
-            pattern = r"^[A-Za-zА-Яа-я]+$"
+            pattern = r"^[A-Za-zА-Яа-я]{0,50}$"
             if not re.match(pattern, value):
-                raise ValueError("Country must contain only letters.")
+                raise ValueError(
+                    "Country must contain only letters, and be up to 50 characters long.")
         return value
 
     @validator("city")
@@ -256,10 +259,10 @@ class SupplierBase(BaseModel):
             if value.strip() == "":
                 raise ValueError("Country cannot contain only spaces.")
             # Проверка города: только буквы
-            pattern = r"^[A-Za-zА-Яа-я\s-]+$"
+            pattern = r"^[A-Za-zА-Яа-я\s-]{0,50}$"
             if not re.match(pattern, value):
                 raise ValueError(
-                    "City must contain only letters, spaces, and hyphens.")
+                    "City must contain only letters, spaces, and hyphens, and be up to 50 characters long.")
         return value
 
     @validator("website")
