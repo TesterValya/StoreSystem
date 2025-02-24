@@ -418,7 +418,7 @@ async function searchProduct() {
     const token = await getTokenFromDatabase();
     const searchQuery = document.getElementById("search-name").value.trim();
 
-    const response = await fetch(`http://localhost:8002/search_products?name=${encodeURIComponent(searchQuery)}`, {
+    const response = await fetch(`http://localhost:8002/search_products/?name=${encodeURIComponent(searchQuery)}`, {
         headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
