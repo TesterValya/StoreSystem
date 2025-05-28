@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Валидация email
-        let emailPattern = /^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        const emailPattern = /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]{0,62}[a-zA-Z0-9]@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
         if (!emailPattern.test(email)) {
             showError('emailError', "В поле email присутствуют недопустимые символы.");
             valid = false;
