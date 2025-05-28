@@ -135,7 +135,7 @@ async def update_product(product_id: str, product: schemas.ProductUpdate, db: Se
     existing_product = db.query(models.Product).filter(
         func.lower(models.Product.name) == func.lower(product.name)
     ).first()
-    if existing_product:
+    if existing_product and str(existing_product.product_id) != product_id:
         raise HTTPException(
             status_code=422, detail="This product is already existed")
 
