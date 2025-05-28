@@ -103,9 +103,9 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_s
                 "email": created_user.email
             }
         }
-    except HTTPException as http_exc:
-        # Логируем исключение с конкретным кодом ошибки
-        raise http_exc
+    except HTTPException as e:
+        logger.log_message(f"Registration failed: {str(e.detail)}")
+        raise e
     except Exception as e:
         logger.log_message(f"An error occurred: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
