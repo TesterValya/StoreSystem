@@ -31,13 +31,23 @@ class UserCreate(BaseModel):
 
     @validator("email")
     def validate_email(cls, value):
-        # Проверка первой части email до знака @
-        local_part_pattern = (
-            r"^(?!\.)(?!.*\.\.)([a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+)(?<!\.)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$"
-        )
-        if not re.match(local_part_pattern, value):
+        email = value.strip().lower()
+
+        # Разделим email на локальную и доменную части
+        if '@' not in email:
             raise ValueError("Invalid email format.")
-        return value.lower()  # Приводим к нижнему регистру для единого хранения
+
+        local, domain = email.split('@', 1)
+
+        # Проверка локальной части
+        if not re.match(r"^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]{0,62}[a-zA-Z0-9]$", local):
+            raise ValueError("Invalid local part in email.")
+
+        # Проверка доменной части
+        if not re.match(r"^(?!-)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$", domain):
+            raise ValueError("Invalid domain in email.")
+
+        return email
 
     class Config:
         orm_mode = True  # Для работы с ORM (если используется SQLAlchemy)
