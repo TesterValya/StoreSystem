@@ -67,7 +67,7 @@ services:
       resources:
         limits:
           cpus: '0.5'
-          memory: 512MB
+          memory: 1GB
       restart_policy:
         condition: on-failure
         max_attempts: 3
@@ -141,7 +141,7 @@ services:
       resources:
         limits:
           cpus: '0.2'
-          memory: 512MB
+          memory: 1GB
       restart_policy:
         condition: on-failure
         max_attempts: 3
