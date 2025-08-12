@@ -1,8 +1,5 @@
 #filebeat.yml
 logging.level: debug
-logging.to_files: false
-logging.to_syslog: false
-logging.to_console: true
 filebeat.inputs:
 - type: log
   enabled: true
