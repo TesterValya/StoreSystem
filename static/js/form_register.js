@@ -7,27 +7,52 @@ document.addEventListener('DOMContentLoaded', function () {
         let password = document.getElementById('password').value;
         let valid = true;
 
-        // Сброс сообщений об ошибках и успехе
+        // Функция для сброса ошибок
+        function resetError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.style.display = 'none';
+            errorElement.innerText = '';  // очищаем текст ошибки
+        }
+
+        // Функция для отображения ошибки
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.innerText = message;
+            errorElement.style.display = 'block';
+        }
+
+        // Сброс сообщений об ошибках
+        resetError('usernameError');
+        resetError('emailError');
+        resetError('passwordError');
         document.getElementById('successMessage').style.display = 'none';
-        document.getElementById('usernameError').style.display = 'none';
-        document.getElementById('emailError').style.display = 'none';
-        document.getElementById('passwordError').style.display = 'none';
 
         // Валидация имени пользователя
-        if (username.length < 3 || username.length > 60) {
-            document.getElementById('usernameError').style.display = 'block';
+        if (username.trim() === "" || /^\s/.test(username)) {
+            showError('usernameError', "Имя не может содержать только пробелы или начинаться с пробела.");
+            valid = false;
+        } else if (username.length < 3 || username.length > 50) {
+            showError('usernameError', "Имя пользователя должно быть от 3 до 50 символов.");
             valid = false;
         }
 
         // Валидация email
-        let emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        let emailPattern = /^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         if (!emailPattern.test(email)) {
-            document.getElementById('emailError').style.display = 'block';
+            showError('emailError', "В поле email присутствуют недопустимые символы.");
+            valid = false;
+        }
+        // Валидация пароля
+        if (password.trim() === "" || /^\s/.test(password)) {
+            showError('passwordError', "Пароль не может содержать только пробелы или начинаться с пробела.");
+            valid = false;
+        } else if (password.length < 8) {
+            showError('passwordError', "Пароль должен быть более 8 символов.");
             valid = false;
         }
 
-        // Валидация пароля
-        if (password.length < 6) {
+        if (password.length < 8) {
+            document.getElementById('passwordError').innerText = "Пароль должен быть более 8 символов.";
             document.getElementById('passwordError').style.display = 'block';
             valid = false;
         }
@@ -48,14 +73,30 @@ document.addEventListener('DOMContentLoaded', function () {
             })
                 .then(response => {
                     if (response.status === 201) {
-                        // Если регистрация успешна, перенаправляем на страницу логина
-                        window.location.href = "/login";
+                        // Если регистрация прошла успешно, отображаем сообщение об успехе
+                        const successMessage = document.getElementById('successMessage');
+                        successMessage.style.display = 'block';
+
+                        // Ждем 3 секунды перед перенаправлением
+                        setTimeout(() => {
+                            window.location.href = "/login";
+                        }, 3000);
+
                     } else {
                         return response.json().then(data => {
                             // Если возникла ошибка, отображаем сообщение об ошибке
                             if (data.detail === "Email already registered") {
                                 document.getElementById('emailError').innerText = "Этот email уже зарегистрирован.";
                                 document.getElementById('emailError').style.display = 'block';
+                            } else if (data.detail === "Invalid email format.") {
+                                document.getElementById('emailError').innerText = "В поле email присутствуют недопустимые символы.";
+                                document.getElementById('emailError').style.display = 'block';
+                            } else if (data.detail === "Name contains invalid characters.") {
+                                document.getElementById('usernameError').innerText = "Имя не может содержать только пробелы или начинаться с пробела.";
+                                document.getElementById('usernameError').style.display = 'block';
+                            } else if (data.detail === "Password contains invalid characters.") {
+                                document.getElementById('passwordError').innerText = "Пароль не может содержать только пробелы или начинаться с пробела.";
+                                document.getElementById('passwordError').style.display = 'block';
                             } else {
                                 alert("Ошибка при регистрации");
                             }

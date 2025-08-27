@@ -1,14 +1,14 @@
 # crud.py
 from sqlalchemy.orm import Session
 from app.models import User
-from app.schemas import UserCreate
+from app.schemas import UserCreate, UserUpdate
 from app.auth import get_password_hash
 import uuid
 from app import logger, schemas
 
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
+    return db.query(User).filter(User.email == email.lower()).first()
 
 
 def create_user(db: Session, user: UserCreate, is_superadmin: bool = False):
@@ -43,12 +43,14 @@ def assign_role_to_user(db: Session, email: str, password: str):
 
 def promote_to_superadmin(db: Session, user_id: uuid.UUID):
     user = db.query(User).filter(User.id == user_id).first()
-    if user:
-        user.is_superadmin = True
-        db.commit()
-        db.refresh(user)
-        logger.log_message(
-            f"A user {user.email} promoted to super admin in the database")
+    if not user:
+        return None
+
+    user.is_superadmin = True
+    db.commit()
+    db.refresh(user)
+    logger.log_message(
+        f"A user {user.email} promoted to super admin in the database")
     return user
 
 
@@ -64,28 +66,31 @@ def get_user_by_id(db: Session, user_id: uuid.UUID, requesting_user: User):
     return db.query(User).filter(User.id == requesting_user.id).first()
 
 
-def edit_user(db: Session, user_id: str, user_data: schemas.UserUpdate):  # Редактирование пользователя
+def edit_user(db: Session, user_id: str, user_data: UserUpdate):
     user = db.query(User).filter(User.id == user_id).first()
-    if user:
-        if user_data.email:
-            user.email = user_data.email
-        if user_data.name:
-            user.name = user_data.name
-        # При необходимости можно добавить другие поля для редактирования
-        db.commit()
-        db.refresh(user)
-        logger.log_message(
-            f"User {user.email} has been updated in the database")
-        return user
-    return None
+    if not user:
+        return None
+
+    # Обновляем только те поля, которые переданы в запросе
+    if user_data.email is not None:
+        user.email = user_data.email
+    if user_data.name is not None:
+        user.name = user_data.name
+
+    db.commit()
+    db.refresh(user)
+    logger.log_message(f"User {user.email} has been updated in the database")
+    return user
 
 
 def delete_user(db: Session, user_id: str):  # Удаление пользователя
     user = db.query(User).filter(User.id == user_id).first()
-    if user:
-        db.delete(user)
-        db.commit()
-        logger.log_message(
-            f"User {user.email} has been deleted from the database")
-        return user
-    return None
+    if not user:
+        # Возвращаем None, если пользователь не найден
+        return None
+
+    db.delete(user)
+    db.commit()
+    logger.log_message(
+        f"User {user.email} has been deleted from the database")
+    return user
